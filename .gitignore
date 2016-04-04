@@ -1,0 +1,10 @@
+*.csv
+*.xlsx
+
+*.html
+
+
+*.pyc
+
+# All directories
+*/
