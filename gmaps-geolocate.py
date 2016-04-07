@@ -35,5 +35,5 @@ for member in col.find({"location": {"$exists": False}})[1:]:
                 time -= update_diff
     else:
         print("FUCKED Up")
-        with open("error_maps/{}".format(member["Registration Number"]), "w") as file:
+        with open("error_maps/{}".format(str(member["_id"])), "w") as file:
             file.write(str(member))
