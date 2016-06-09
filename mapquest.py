@@ -4,7 +4,7 @@ import pprint
 def geolocate(address):
     """
     Makes a request to map quests geolocate api
-    :param address: String field containing address coordinates
+    :param address: List of strings. Strings containing addresses
     :return: Dictionary of latitude and longitude values
     """
     geolocateURL = "http://www.mapquestapi.com/geocoding/v1/batch"
