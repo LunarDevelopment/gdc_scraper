@@ -1,10 +1,15 @@
 *.csv
 *.xlsx
 
-*.html
-
-
 *.pyc
 
-# All directories
-*/
+# Virtual Environment
+venv
+
+# Python package stuff
+*.egg-info/
+
+# Cache pages
+__cache__
+.cache
+

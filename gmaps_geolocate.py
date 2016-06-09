@@ -5,15 +5,49 @@ import pprint
 from time import sleep
 
 APIKEY = "AIzaSyDDj7EvYk-arWEqLFuMZeWcQ7cw6MaPhms"
+
+
+class GmapsGeocoder():
+
+    def __init__(self, members, data_store, gmaps=Client(key=APIKEY)):
+        """
+        @param members - Queue - queue of members that need to have their locations found
+        @param gmaps - GoogleMaps Client - Gmaps client for making address requests.
+        @param data_store - Queue - queue to push 
+        """
+        self.gmaps =  gmaps
+        self.members = members
+
+    def get_member_location(self, member):
+        geocode_result = self.gmaps.geocode(member["address"])
+        #check if we have a result?
+        if len(geocode_result) > 0:
+            return geocode_result[0]["geometry"]["location"]
+        else:
+            return False
+
+    def get_member_locations():
+        # while queue is not empty
+        while not self.queue.empty():
+            member = self.queue.get()
+            geoPoint = self.get_member_location(member)
+
+            if geoPoint:
+                self.data_store.push(geoPoint[0]["geometry"]["location"])
+
+
+
+
+
+
 pp = pprint.PrettyPrinter(indent=4)
 
-gmaps = Client(key=APIKEY)
 col = MongoClient()["tubules"]["members"]
 
 # Find all members who don't have location points in already
 for member in col.find({"location": {"$exists": False}})[1:]:
     print(member)
-    geocode_result = gmaps.geocode(member["address"])
+    geocode_result = self.gmaps.geocode(member["address"])
     if len(geocode_result) > 0:
         try:
             pp.pprint(geocode_result[0]["geometry"]["location"])
