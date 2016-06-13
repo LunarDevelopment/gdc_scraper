@@ -19,7 +19,11 @@ class GmapsGeocoder():
         self.members = members
 
     def get_member_location(self, member):
-        geocode_result = self.gmaps.geocode(member["address"])
+        address = member.get("address", False)
+        if not address:
+            return False
+
+        geocode_result = self.gmaps.geocode(address)
         # check if we have a result?
         if len(geocode_result) > 0:
             return geocode_result[0]["geometry"]["location"]
@@ -40,6 +44,7 @@ class GmapsGeocoder():
     def run():
         # Get data from that col
         # 
+        pass
 
 
 
