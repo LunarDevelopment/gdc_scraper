@@ -1,8 +1,8 @@
 from googlemaps import Client
 from googlemaps.exceptions import Timeout
-from pymongo import MongoClient
 import pprint
 from time import sleep
+from pymongo import UpdateOne
 
 APIKEY = "AIzaSyDDj7EvYk-arWEqLFuMZeWcQ7cw6MaPhms"
 
@@ -17,9 +17,11 @@ class GmapsGeocoder():
         """
         self.gmaps = gmaps
         self.members = members
+        self.data_store = data_store
 
     def get_member_location(self, member):
         address = member.get("address", False)
+        print("address: {}".format(address))
         if not address:
             return False
 
@@ -28,23 +30,56 @@ class GmapsGeocoder():
         if len(geocode_result) > 0:
             return geocode_result[0]["geometry"]["location"]
         else:
+            print(geocode_result)
+            print("Not enough results found")
             return False
 
     def get_member_locations(self):
         # while queue is not empty
-        while not self.queue.empty():
-            member = self.queue.get()
+        while not self.members.empty():
+            member = self.members.get()
             geoPoint = self.get_member_location(member)
-
+            print("geoPoint = {}".format(geoPoint))
             if geoPoint:
-                self.data_store.push(geoPoint)
+                self.data_store.append(
+                    UpdateOne(
+                        {"_id": member["_id"]},
+                        {"$set": {"location": geoPoint}},
+                        upsert=True
+                    )
+                )
+
+            self.members.task_done()
 
 
+if __name__ == "__main__":
+    from pymongo import MongoClient
+    from threading import Thread
+    from queue import Queue
 
-    def run():
-        # Get data from that col
-        # 
-        pass
+    c = MongoClient()["tubules"]["members"]
+    no_location_members = c.find({"location": {"$exists": False}})
+
+    # client = Client(key=APIKEY)
+    members = Queue()
+    data_store = []
+
+    g = GmapsGeocoder(members, data_store)
+    threads = [Thread(target=g.get_member_locations) for i in range(10)]
+
+    for i in no_location_members:
+        members.put(i)
+
+    for t in threads:
+        t.start()
+    try:
+        members.join()
+    except Exception:
+        print("In exception")
+    finally:
+        c.bulk_write(data_store)
+
+
 
 
 
